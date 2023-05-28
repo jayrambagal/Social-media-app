@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { setLogin } from "../state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "../components/FlexBetween";
+import { Spin } from 'antd';
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -49,6 +50,7 @@ const initialValuesLogin = {
 const Form = () => {
 
   const [pageType, setPageType] = useState("login");
+  const [isLoading, setLoding] = useState(false)
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -57,6 +59,7 @@ const Form = () => {
   const isRegister = pageType === "register";
 
   const register = async (values, onSubmitProps) => {
+    setLoding(true)
     // this allows us to send form info with image
     const formData = new FormData();
     
@@ -72,26 +75,29 @@ const Form = () => {
         body: formData,
       }
     );
-    window.alert("register successfully")
+    setLoding(false)
+    window.alert("register successfully please login")
     navigate("/home")
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
     console.log("register successfull")
     if (savedUser) {
       setPageType("login");  
-    }
-    
-    
-    
+    }   
   };
 
   const login = async (values, onSubmitProps) => {
+    setLoding(true)
     const loggedInResponse = await fetch("https://socialmedia-tuji.onrender.com/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
     const loggedIn = await loggedInResponse.json();
+    setLoding(false)
+    console.log(loggedIn);
+    console.log(loggedIn.msg);
+
     onSubmitProps.resetForm();
     if (loggedIn) {
       dispatch(
@@ -100,8 +106,14 @@ const Form = () => {
           token: loggedIn.token,
         })
       );
-      window.alert("login successfully")
-      navigate("/home");
+      if((loggedIn.msg === "User does not exist." || "Invalid credentials.") && loggedIn.msg !== undefined){
+        window.alert(loggedIn.msg)
+        navigate("/home");
+      }else{
+        window.alert("login Succesfully")
+        navigate("/home");
+      }
+      
     }
   };
 
@@ -110,6 +122,12 @@ const Form = () => {
     if (isRegister) await register(values, onSubmitProps);
   };
 
+   if(isLoading){
+    return <>
+      <Spin />
+    </>
+   }
+  
   return (
     <Formik
       onSubmit={handleFormSubmit}
@@ -275,6 +293,7 @@ const Form = () => {
             </Typography>
           </Box>
         </form>
+        
       )}
     </Formik>
   );

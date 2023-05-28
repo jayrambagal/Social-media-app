@@ -58,7 +58,7 @@ const Navbar = () => {
             },
           }}
         >
-          SocialMedia
+          Memepedia
         </Typography>
         {isNonMobileScreens && (
           <FlexBetween
