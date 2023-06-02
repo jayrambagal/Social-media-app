@@ -1,5 +1,6 @@
 //  importing dependancies
 import express from "express";
+import Razorpay from "razorpay";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -14,6 +15,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import paymentRoutes from "./routes/paymentRoutes.js"
 
 // importing different controllers
 import { register } from "./controllers/auth.js";
@@ -59,6 +61,20 @@ app.post("/posts", verifyToken, upload.single("picture"), createPost);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+
+// creating instace for payment gateway
+export const instance = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET,
+})
+
+// using routes
+app.use("/api",paymentRoutes)
+
+app.get("/api/getkey",(req,res)=>{
+  res.status(200).json({key:process.env.RAZORPAY_API_KEY})
+})
+
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;

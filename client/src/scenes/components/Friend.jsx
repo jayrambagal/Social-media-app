@@ -23,7 +23,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
 
   const patchFriend = async () => {
     const response = await fetch(
-      `https://socialmedia-tuji.onrender.com/users/${_id}/${friendId}`,
+      `http://localhost:3002/users/${_id}/${friendId}`,
       {
         method: "PATCH",
         headers: {

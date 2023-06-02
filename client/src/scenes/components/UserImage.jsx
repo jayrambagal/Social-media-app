@@ -8,7 +8,7 @@ const UserImage = ({ image, size = "60px" }) => {
         width={size}
         height={size}
         alt="user"
-        src={`https://socialmedia-tuji.onrender.com/assets/${image}`}
+        src={`http://localhost:3002/assets/${image}`}
       />
     </Box>
   );

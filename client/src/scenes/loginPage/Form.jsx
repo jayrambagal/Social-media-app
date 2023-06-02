@@ -16,6 +16,8 @@ import { setLogin } from "../state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "../components/FlexBetween";
 import { Spin } from 'antd';
+import { ToastContainer, toast } from "react-toastify";
+import ToastMsg from "../components/ToastMsg";
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -69,7 +71,7 @@ const Form = () => {
     formData.append("picturePath", values.picture.name);
     
     const savedUserResponse = await fetch(
-      "https://socialmedia-tuji.onrender.com/auth/register",
+      "http://localhost:3002/auth/register",
       {
         method: "POST",
         body: formData,
@@ -88,7 +90,7 @@ const Form = () => {
 
   const login = async (values, onSubmitProps) => {
     setLoding(true)
-    const loggedInResponse = await fetch("https://socialmedia-tuji.onrender.com/auth/login", {
+    const loggedInResponse = await fetch("http://localhost:3002/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
@@ -117,16 +119,19 @@ const Form = () => {
     }
   };
 
+
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
   };
 
    if(isLoading){
-    return <>
+    return <div className="flex flex-col gap-5">
       <Spin />
-    </>
+    </div>
    }
+
+
   
   return (
     <Formik
@@ -229,12 +234,14 @@ const Form = () => {
                           </FlexBetween>
                         )}
                       </Box>
+                     
                     )}
                   </Dropzone>
                 </Box>
               </>
             )}
-
+            <ToastContainer />
+           
             <TextField
               label="Email"
               onBlur={handleBlur}
@@ -295,6 +302,7 @@ const Form = () => {
         </form>
         
       )}
+      
     </Formik>
   );
 };
