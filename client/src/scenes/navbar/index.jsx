@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   IconButton,
@@ -22,11 +22,16 @@ import {
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "../state";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FlexBetween from "../components/FlexBetween";
+import axios from "axios";
 
 const Navbar = () => {
+  const Ref = useRef();
+  const [open, setOpen] = useState(false);
 
+  const [searchInput, setSearchInput] = useState("");
+  const [users, setUsers] = useState([]);
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,6 +47,36 @@ const Navbar = () => {
 
   const fullName = `${user.firstName} ${user.lastName}`;
   // const fullName = " Jay Bagal"
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:3002/users");
+      const data = await response.data;
+      setUsers(data);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  useEffect(()=>{
+    let handle =(e)=>{
+      if(!Ref.current.contains(e.target)){
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown",handle)
+
+    return()=>{
+      document.removeEventListener("mousedown",handle)
+    }
+  })
 
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
@@ -61,17 +96,52 @@ const Navbar = () => {
           Memepedia
         </Typography>
         {isNonMobileScreens && (
-          <FlexBetween
-            backgroundColor={neutralLight}
-            borderRadius="9px"
-            gap="3rem"
-            padding="0.1rem 1.5rem"
-          >
-            <InputBase placeholder="Search..." />
-            <IconButton>
-              <Search />
-            </IconButton>
-          </FlexBetween>
+          <div>
+            <FlexBetween
+              backgroundColor={neutralLight}
+              borderRadius="9px"
+              gap="3rem"
+              padding="0.1rem 1.5rem"
+              className="relative"
+            >
+              <InputBase
+                placeholder="Search..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onClick={()=>setOpen(true)}
+              />
+
+              <IconButton>
+                <Search />
+              </IconButton>
+            </FlexBetween>
+            <div ref={Ref}
+                className={`absolute w-1/5 rounded-md flex flex-col gap-2 
+                         bg-[#333333] mt-2 text-start p-4 text-[#ada5a5] space-y-2`}
+                         style={{ display: open ? "" : "none" }}
+              >
+              {searchInput.length > 1 &&
+                users &&
+                users
+                  ?.filter((item) =>
+                    `${item.firstName} ${item.lastName}`
+                      .toLowerCase()
+                      .includes(searchInput.toLowerCase())
+                  )
+                  .slice(0, 10)
+                  .map((user, ind) => {
+                    return (
+                      <Link
+                        key={ind}
+                        className="cursor-pointer hover:text-white  "
+                        to={`/profile/${user._id}`}
+                      >
+                        {user.firstName} {user.lastName}
+                      </Link>
+                    );
+                  })}
+            </div>
+          </div>
         )}
       </FlexBetween>
 
@@ -193,7 +263,7 @@ const Navbar = () => {
         </Box>
       )}
     </FlexBetween>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

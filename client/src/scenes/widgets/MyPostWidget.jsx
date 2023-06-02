@@ -1,4 +1,4 @@
-//  imporing material ui needed Icons 
+//  imporing material ui needed Icons
 import {
   EditOutlined,
   DeleteOutlined,
@@ -25,7 +25,7 @@ import {
 import FlexBetween from "../components/FlexBetween";
 import WidgetWrapper from "../components/WidgetWrapper";
 import UserImage from "../components/UserImage";
-
+import ToastMsg from "../components/ToastMsg";
 
 import Dropzone from "react-dropzone";
 import { useState } from "react";
@@ -33,21 +33,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "../state";
 
 const MyPostWidget = ({ picturePath }) => {
-
   const dispatch = useDispatch();
   const { palette } = useTheme();
 
   const [isImage, setIsImage] = useState(false);
   const [image, setImage] = useState(null);
   const [post, setPost] = useState("");
-  
+  const [showToast, setShowToast] = useState(false);
+
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const mediumMain = palette.neutral.mediumMain;
   const medium = palette.neutral.medium;
-
+  
   const handlePost = async () => {
+    setShowToast(true)
     const formData = new FormData();
     formData.append("userId", _id);
     formData.append("description", post);
@@ -56,7 +57,7 @@ const MyPostWidget = ({ picturePath }) => {
       formData.append("picturePath", image.name);
     }
 
-    const response = await fetch(`https://socialmedia-tuji.onrender.com/posts`, {
+    const response = await fetch(`http://localhost:3002/posts`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -65,17 +66,21 @@ const MyPostWidget = ({ picturePath }) => {
     dispatch(setPosts({ posts }));
     setImage(null);
     setPost("");
+   setShowToast(true)
+   setShowToast(false)
   };
 
   return (
     <WidgetWrapper>
+   <ToastMsg massage="photo uploaded sucssessful" visible={showToast}/>
+    
       <FlexBetween gap="1.5rem">
         <UserImage image={picturePath} />
         <InputBase
           placeholder="What's on your mind..."
           onChange={(e) => setPost(e.target.value)}
           value={post}
-          sx={{ 
+          sx={{
             width: "100%",
             backgroundColor: palette.neutral.light,
             borderRadius: "2rem",
